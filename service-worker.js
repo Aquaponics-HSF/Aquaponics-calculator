@@ -1,4 +1,3 @@
-
 const CACHE_NAME = "aquaponics-cache-v1";
 
 const FILES_TO_CACHE = [
