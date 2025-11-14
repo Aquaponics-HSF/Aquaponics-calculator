@@ -1,24 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Plant to Fish Aquaponics Calculator</title>
-
-  <!-- PWA hooks -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#22c55e">
   <link rel="icon" href="app-header.jpg">
   <script>
     if ("serviceWorker" in navigator) {
-      window.addEventListener("load", function () {
-        navigator.serviceWorker.register("service-worker.js")
-          .catch(function (err) {
-            console.log("Service worker registration failed:", err);
-          });
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("service-worker.js");
       });
     }
   </script>
 
+  <meta charset="UTF-8" />
+  <title>Plant to Fish Aquaponics Calculator</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     :root {
@@ -57,41 +52,38 @@
       position: relative;
       border-radius: 1rem;
       overflow: hidden;
-      margin-bottom: 1.3rem;
+      margin-bottom: 1.1rem;
       border: 1px solid rgba(148,163,184,0.4);
     }
     .hero img {
       width: 100%;
       display: block;
     }
+    /* Overlay moved to TOP, centered, to sit over the icon / 2025 area */
     .hero-overlay {
       position: absolute;
       left: 0;
       right: 0;
-      bottom: 0;
-      padding: 0.6rem 1rem;
-      background: linear-gradient(to top, rgba(15,23,42,0.92), transparent);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.75rem;
+      top: 0;
+      padding: 0.8rem 1rem 0.9rem;
+      background: linear-gradient(to bottom, rgba(15,23,42,0.95), transparent);
+      text-align: center;
+      pointer-events: none;
     }
     .hero-title {
-      font-size: 1.05rem;
-      font-weight: 600;
+      background: rgba(0,0,0,0.5);
+      padding: 6px 12px;
+      border-radius: 8px;
+
+      font-size: 1.6rem;
+      font-weight: 700;
+      text-shadow: 0 2px 6px rgba(0,0,0,0.9);
     }
     .hero-sub {
-      font-size: 0.75rem;
-      color: var(--muted);
-    }
-    .hero-badge {
-      font-size: 0.75rem;
-      padding: 0.25rem 0.7rem;
-      border-radius: 999px;
-      border: 1px solid rgba(148,163,184,0.4);
-      background: rgba(15,23,42,0.9);
-      color: var(--muted);
-      white-space: nowrap;
+      margin-top: 0.15rem;
+      font-size: 0.9rem;
+      color: #e5e7eb;
+      text-shadow: 0 2px 5px rgba(0,0,0,0.8);
     }
 
     .grid {
@@ -144,7 +136,6 @@
       gap: 0.6rem;
     }
     .row > .field { flex: 1; }
-
     .output-main {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -182,26 +173,68 @@
     @media (max-width: 640px) {
       body { padding: 1rem; }
       .app { padding: 1.1rem; border-radius: 1rem; }
-      .hero-title { font-size: 0.95rem; }
-      .hero-sub { display: none; }
+      .hero-title {
+      background: rgba(0,0,0,0.5);
+      padding: 6px 12px;
+      border-radius: 8px;
+ font-size: 1.2rem; }
+      .hero-sub { font-size: 0.8rem; }
     }
   </style>
+
+<style>
+body.light {
+  --bg: #f4f4f4;
+  --card: #ffffff;
+  --accent: #22c55e;
+  --border: #d0d0d0;
+  --text: #111827;
+  --muted: #4b5563;
+  background: #fafafa !important;
+  color: #111827 !important;
+}
+body.light .app {
+  background: #ffffff !important;
+  color: #111827 !important;
+}
+body.light .card {
+  background: #ffffff !important;
+  border-color: #d0d0d0 !important;
+}
+.theme-toggle {
+  position:absolute;
+  top:10px;
+  right:10px;
+  padding:6px 12px;
+  border-radius:8px;
+  background:#22c55e;
+  color:white;
+  cursor:pointer;
+  font-weight:600;
+  border:none;
+}
+</style>
+
+<script>
+function toggleTheme() {
+  document.body.classList.toggle("light");
+}
+</script>
 </head>
 <body>
+<button class='theme-toggle' onclick='toggleTheme()'>Theme</button>
 <div class="app">
 
   <div class="hero">
     <img src="app-header.jpg" alt="Think Namibia Aquaponics 2025" />
     <div class="hero-overlay">
-      <div>
-        <div class="hero-title">Plant to Fish Aquaponics Calculator</div>
-        <div class="hero-sub">Balance plant feed demand with fish biomass · DWC + Gravel</div>
-      </div>
-      <div class="hero-badge">Offline · Installable</div>
+      <div class="hero-title">Plant to Fish Aquaponics Calculator</div>
+      <div class="hero-sub">Balance plant feed demand with fish biomass · DWC + Gravel</div>
     </div>
   </div>
 
   <div class="grid">
+    <!-- PLANT CARD -->
     <section class="card">
       <h2>Plant inputs</h2>
 
@@ -229,6 +262,9 @@
           <option value="30">30</option>
           <option value="35">35</option>
         </select>
+
+
+
       </div>
 
       <div class="field">
@@ -275,6 +311,7 @@
       </p>
     </section>
 
+    <!-- FISH CARD -->
     <section class="card">
       <h2>Fish & outputs</h2>
 
@@ -329,8 +366,21 @@
       <p class="muted">
         Never force-feed fish to meet plant demand – change biomass instead.
       </p>
+      <div class="footer-notes" style="margin-top:18px; padding-top:14px; border-top:1px solid #334155; font-size:0.85rem; color:#cbd5e1;">
+        <h3 style="margin:0 0 6px; color:#e2e8f0;">System Notes</h3>
+        <p><strong>TAN (Total Ammonia Nitrogen)</strong>: amount of ammonia-N released from feed digestion. Using ~28.8 g TAN per kg of 30% protein feed.</p>
+        <p><strong>%BW/day</strong>: percent of total fish biomass fed daily. Typical tilapia grow-out range: 2–6%.</p>
+        <p><strong>Feeding guidance</strong>: higher %BW/day for juveniles/warm water; reduce for larger fish or cooler water. Never overfeed to satisfy plant demand—adjust biomass instead.</p>
+      
+          <p><strong>Feed rate impact:</strong> Feed input directly drives TAN and nitrate output; stable feeding helps maintain biofilter and plant uptake balance.</p>
+      </div>
     </section>
   </div>
+
+  <div style="text-align:left; font-size:0.75rem; color:#64748b; margin-top:12px;">
+    © by Patrick Hilger
+  </div>
+
 </div>
 
 <script>
