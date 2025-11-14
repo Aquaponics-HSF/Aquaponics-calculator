@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#22c55e">
+  <link rel="icon" href="app-header.jpg">
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("service-worker.js");
+      });
+    }
+  </script>
+
+  <meta charset="UTF-8" />
+  <title>Plant to Fish Aquaponics Calculator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #111827;
+      --accent: #22c55e;
+      --accent-soft: rgba(34, 197, 94, 0.12);
+      --border: #1f2937;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #111827, #020617);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    .app {
+      width: 100%;
+      max-width: 980px;
+      background: rgba(15,23,42,0.97);
+      border-radius: 1.5rem;
+      padding: 1.5rem;
+      border: 1px solid rgba(148,163,184,0.4);
+      box-shadow:
+        0 20px 50px rgba(15,23,42,0.9),
+        0 0 0 1px rgba(15,23,42,0.7);
+    }
+
+    .hero {
+      position: relative;
+      border-radius: 1rem;
+      overflow: hidden;
+      margin-bottom: 1.1rem;
+      border: 1px solid rgba(148,163,184,0.4);
+    }
+    .hero img {
+      width: 100%;
+      display: block;
+    }
+    /* Overlay moved to TOP, centered, to sit over the icon / 2025 area */
+    .hero-overlay {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      padding: 0.8rem 1rem 0.9rem;
+      background: linear-gradient(to bottom, rgba(15,23,42,0.95), transparent);
+      text-align: center;
+      pointer-events: none;
+    }
+    .hero-title {
+      background: rgba(0,0,0,0.5);
+      padding: 6px 12px;
+      border-radius: 8px;
+
+      font-size: 1.6rem;
+      font-weight: 700;
+      text-shadow: 0 2px 6px rgba(0,0,0,0.9);
+    }
+    .hero-sub {
+      margin-top: 0.15rem;
+      font-size: 0.9rem;
+      color: #e5e7eb;
+      text-shadow: 0 2px 5px rgba(0,0,0,0.8);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.25rem;
+    }
+    .card {
+      background: var(--card);
+      border-radius: 1rem;
+      padding: 1rem 1.1rem 1.1rem;
+      border: 1px solid var(--border);
+    }
+    .card h2 {
+      margin: 0 0 0.8rem;
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+    }
+    .field { margin-bottom: 0.6rem; }
+    label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 0.1rem;
+    }
+    label small {
+      font-size: 0.7rem;
+      color: var(--muted);
+    }
+    input[type="number"], select {
+      width: 100%;
+      padding: 0.45rem 0.6rem;
+      border-radius: 0.5rem;
+      border: 1px solid var(--border);
+      background: #020617;
+      color: var(--text);
+      font-size: 0.85rem;
+      outline: none;
+      transition: border 0.15s, box-shadow 0.15s;
+    }
+    input[type="number"]:focus, select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px var(--accent-soft);
+    }
+    .row {
+      display: flex;
+      gap: 0.6rem;
+    }
+    .row > .field { flex: 1; }
+    .output-main {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.75rem;
+      margin-top: 0.5rem;
+    }
+    .stat {
+      border-radius: 0.8rem;
+      padding: 0.6rem 0.8rem;
+      background: radial-gradient(circle at top left, rgba(34,197,94,0.08), #020617);
+      border: 1px solid rgba(55,65,81,0.8);
+    }
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-bottom: 0.15rem;
+    }
+    .stat-value {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+    .stat-sub {
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-top: 0.1rem;
+    }
+    .muted {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 0.5rem;
+    }
+    .muted strong { color: var(--accent); }
+    .warn { color: #fecaca; }
+
+    @media (max-width: 640px) {
+      body { padding: 1rem; }
+      .app { padding: 1.1rem; border-radius: 1rem; }
+      .hero-title {
+      background: rgba(0,0,0,0.5);
+      padding: 6px 12px;
+      border-radius: 8px;
+ font-size: 1.2rem; }
+      .hero-sub { font-size: 0.8rem; }
+    }
+  </style>
+
+<style>
+body.light {
+  --bg: #f4f4f4;
+  --card: #ffffff;
+  --accent: #22c55e;
+  --border: #d0d0d0;
+  --text: #111827;
+  --muted: #4b5563;
+  background: #fafafa !important;
+  color: #111827 !important;
+}
+body.light .app {
+  background: #ffffff !important;
+  color: #111827 !important;
+}
+body.light .card {
+  background: #ffffff !important;
+  border-color: #d0d0d0 !important;
+}
+.theme-toggle {
+  position:absolute;
+  top:10px;
+  right:10px;
+  padding:6px 12px;
+  border-radius:8px;
+  background:#22c55e;
+  color:white;
+  cursor:pointer;
+  font-weight:600;
+  border:none;
+}
+</style>
+
+<script>
+function toggleTheme() {
+  document.body.classList.toggle("light");
+}
+</script>
+</head>
+<body>
+<button class='theme-toggle' onclick='toggleTheme()'>Theme</button>
+<div class="app">
+
+  <div class="hero">
+    <img src="app-header.jpg" alt="Think Namibia Aquaponics 2025" />
+    <div class="hero-overlay">
+      <div class="hero-title">Plant to Fish Aquaponics Calculator</div>
+      <div class="hero-sub">Balance plant feed demand with fish biomass · DWC + Gravel</div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <!-- PLANT CARD -->
+    <section class="card">
+      <h2>Plant inputs</h2>
+
+      <div class="field">
+        <label>DWC length (m)</label>
+        <input id="dwcLength" type="number" step="0.01" value="2.3" />
+      </div>
+
+      <div class="field">
+        <label>DWC width (m)</label>
+        <input id="dwcWidth" type="number" step="0.01" value="1.17" />
+      </div>
+
+      <div class="field">
+        <label>DWC area (m²) <small>auto</small></label>
+        <input id="dwcArea" type="number" disabled />
+      </div>
+
+      <div class="field">
+        <label>DWC feed rate (g/m²·day)</label>
+        <select id="dwcFeedRate">
+          <option value="15">15</option>
+          <option value="20">20</option>
+          <option value="25" selected>25</option>
+          <option value="30">30</option>
+          <option value="35">35</option>
+        </select>
+
+
+
+      </div>
+
+      <div class="field">
+        <label>DWC feed floor (kg/day) <small>area × rate ÷ 1000</small></label>
+        <input id="dwcFeedFloor" type="number" disabled />
+      </div>
+
+      <div class="field">
+        <label>
+          Include gravel media?
+          <small>uncheck for DWC-only</small>
+        </label>
+        <input id="includeGravel" type="checkbox" checked />
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label>Gravel area (m²)</label>
+          <input id="gravelArea" type="number" step="0.1" value="6.4" />
+        </div>
+        <div class="field">
+          <label>Gravel feed rate (g/m²·day)</label>
+          <select id="gravelFeedRate">
+            <option value="30">30</option>
+            <option value="35">35</option>
+            <option value="40" selected>40</option>
+            <option value="45">45</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Gravel feed floor (kg/day)</label>
+        <input id="gravelFeedFloor" type="number" disabled />
+      </div>
+
+      <div class="field">
+        <label>Combined plant feed demand (kg/day)</label>
+        <input id="plantDemand" type="number" disabled />
+      </div>
+
+      <p class="muted">
+        Set your DWC and gravel media areas and feed rates (g/m²·day). Combined demand drives the required fish biomass.
+      </p>
+    </section>
+
+    <!-- FISH CARD -->
+    <section class="card">
+      <h2>Fish & outputs</h2>
+
+      <div class="field">
+        <label>Average fish weight (g)</label>
+        <input id="avgWeight" type="number" step="1" value="150" />
+      </div>
+
+      <div class="field">
+        <label>Chosen feeding rate (% body weight/day)</label>
+        <select id="feedPercent">
+          <option value="2">2 %</option>
+          <option value="2.5">2.5 %</option>
+          <option value="3">3 %</option>
+          <option value="3.5" selected>3.5 %</option>
+          <option value="4">4 %</option>
+          <option value="5">5 %</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Effective %BW/day used</label>
+        <input id="effectiveBW" type="text" disabled />
+      </div>
+
+      <div class="output-main">
+        <div class="stat">
+          <div class="stat-label">Required fish biomass</div>
+          <div class="stat-value" id="biomassReq">0.00 kg</div>
+          <div class="stat-sub">Fish mass needed to support plant demand</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Suggested fish count</div>
+          <div class="stat-value" id="fishCount">0</div>
+          <div class="stat-sub">At average fish weight</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">TAN-N/day</div>
+          <div class="stat-value" id="tanPerDay">0.0 g</div>
+          <div class="stat-sub">28.8 g TAN per kg feed (30% protein)</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">NO₃⁻/day</div>
+          <div class="stat-value" id="no3PerDay">0.0 g</div>
+          <div class="stat-sub">NO₃⁻ ≈ TAN × 4.43</div>
+        </div>
+      </div>
+
+      <p class="muted" id="bwHint">
+        Feeding rate is within typical 2–6 % BW/day band.
+      </p>
+      <p class="muted">
+        Never force-feed fish to meet plant demand – change biomass instead.
+      </p>
+      <div class="footer-notes" style="margin-top:18px; padding-top:14px; border-top:1px solid #334155; font-size:0.85rem; color:#cbd5e1;">
+        <h3 style="margin:0 0 6px; color:#e2e8f0;">System Notes</h3>
+        <p><strong>TAN (Total Ammonia Nitrogen)</strong>: amount of ammonia-N released from feed digestion. Using ~28.8 g TAN per kg of 30% protein feed.</p>
+        <p><strong>%BW/day</strong>: percent of total fish biomass fed daily. Typical tilapia grow-out range: 2–6%.</p>
+        <p><strong>Feeding guidance</strong>: higher %BW/day for juveniles/warm water; reduce for larger fish or cooler water. Never overfeed to satisfy plant demand—adjust biomass instead.</p>
+      
+          <p><strong>Feed rate impact:</strong> Feed input directly drives TAN and nitrate output; stable feeding helps maintain biofilter and plant uptake balance.</p>
+      </div>
+    </section>
+  </div>
+
+  <div style="text-align:left; font-size:0.75rem; color:#64748b; margin-top:12px;">
+    © by Patrick Hilger
+  </div>
+
+</div>
+
+<script>
+  function toNum(v, defVal) {
+    var n = parseFloat(v);
+    return isNaN(n) ? defVal : n;
+  }
+
+  function updateCalc() {
+    var dwcL = toNum(document.getElementById("dwcLength").value, 0);
+    var dwcW = toNum(document.getElementById("dwcWidth").value, 0);
+    var dwcRate = toNum(document.getElementById("dwcFeedRate").value, 0);
+    var includeGravel = document.getElementById("includeGravel").checked;
+    var gravelA = includeGravel ? toNum(document.getElementById("gravelArea").value, 0) : 0;
+    var gravelRate = includeGravel ? toNum(document.getElementById("gravelFeedRate").value, 0) : 0;
+    var avgW = toNum(document.getElementById("avgWeight").value, 0);
+    var feedPct = toNum(document.getElementById("feedPercent").value, 0);
+    var feedFrac = feedPct / 100.0;
+
+    var dwcArea = dwcL * dwcW;
+    var dwcFeedFloor = (dwcArea * dwcRate) / 1000.0;
+    var gravelFeedFloor = (gravelA * gravelRate) / 1000.0;
+    var plantDemand = dwcFeedFloor + gravelFeedFloor;
+
+    var biomassReq = 0;
+    var fishCount = 0;
+    if (feedFrac > 0) {
+      biomassReq = plantDemand / feedFrac;
+      if (avgW > 0) {
+        fishCount = biomassReq / (avgW / 1000.0);
+      }
+    }
+
+    var tanPerDay = plantDemand * 28.8;
+    var no3PerDay = tanPerDay * 4.43;
+
+    document.getElementById("dwcArea").value = dwcArea.toFixed(2);
+    document.getElementById("dwcFeedFloor").value = dwcFeedFloor.toFixed(3);
+    document.getElementById("gravelFeedFloor").value = gravelFeedFloor.toFixed(3);
+    document.getElementById("plantDemand").value = plantDemand.toFixed(3);
+
+    document.getElementById("effectiveBW").value = feedPct.toFixed(2) + " % BW/day";
+    document.getElementById("biomassReq").textContent = biomassReq.toFixed(2) + " kg";
+    document.getElementById("fishCount").textContent = isFinite(fishCount) ? Math.round(fishCount) : 0;
+    document.getElementById("tanPerDay").textContent = tanPerDay.toFixed(1) + " g";
+    document.getElementById("no3PerDay").textContent = no3PerDay.toFixed(1) + " g";
+
+    var hint = document.getElementById("bwHint");
+    if (feedFrac < 0.02 || feedFrac > 0.06) {
+      hint.innerHTML = '<span class="warn">Warning:</span> feeding rate outside typical 2–6 % BW/day band.';
+    } else {
+      hint.textContent = 'Feeding rate is within typical 2–6 % BW/day band.';
+    }
+  }
+
+  var ids = ["dwcLength","dwcWidth","dwcFeedRate","includeGravel","gravelArea","gravelFeedRate","avgWeight","feedPercent"];
+  ids.forEach(function(id) {
+    var el = document.getElementById(id);
+    el.addEventListener("input", updateCalc);
+    el.addEventListener("change", updateCalc);
+  });
+
+  updateCalc();
+</script>
+</body>
+</html>
